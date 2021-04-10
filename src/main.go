@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -27,10 +31,35 @@ func startMonitoring() {
 }
 
 func getSiteStatus(site string) int {
-	response, _ := http.Get(site)
+	response, err := http.Get(site)
+	if err != nil {
+		fmt.Printf("Error found on gite site", site, ": ", err)
+		return 400
+	}
+
 	return response.StatusCode
 }
 
 func returnSites() []string {
-	return []string{"https://www.facebook.com/", "https://www.instagram.com/", "https://random-status-code.herokuapp.com"}
+	file, err := os.Open("../resource/sites.txt")
+	readerUtil := bufio.NewReader(file)
+
+	if err != nil {
+		fmt.Println("Error found: ", err)
+	}
+
+	var sites []string
+
+	for {
+		line, err := readerUtil.ReadString('\n')
+		line = strings.TrimSpace(line)
+		sites = append(sites, line)
+		if err == io.EOF {
+			break
+		}
+	}
+
+	file.Close()
+
+	return sites
 }
