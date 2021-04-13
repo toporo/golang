@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -19,9 +20,11 @@ func main() {
 		for _, site := range sites {
 			siteStatus := getSiteStatus(site)
 			fmt.Println(site, " Status ->", siteStatus)
+
+			registerLogs(site, siteStatus)
 		}
 		fmt.Println()
-		time.Sleep(60 * time.Second)
+		time.Sleep(15 * time.Second)
 	}
 }
 
@@ -62,4 +65,16 @@ func returnSites() []string {
 	file.Close()
 
 	return sites
+}
+
+func registerLogs(site string, status int) {
+	file, err := os.OpenFile("../logs/logs.txt", os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
+
+	if err != nil {
+		fmt.Println("Ocorreu um erro:", err)
+	}
+
+	file.WriteString(time.Now().Format("02/01/2006 15:04:05") + " " + site + " - Status: " + strconv.Itoa(status) + "\n")
+
+	file.Close()
 }
